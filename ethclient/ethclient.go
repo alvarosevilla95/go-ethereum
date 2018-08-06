@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"strconv"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
@@ -494,4 +495,55 @@ func toCallArg(msg ethereum.CallMsg) interface{} {
 		arg["gasPrice"] = (*hexutil.Big)(msg.GasPrice)
 	}
 	return arg
+}
+
+// TraceByHash returns a single transaction trace
+func (ec *Client) TraceByTxHash(ctx context.Context, txHash common.Hash, result interface{}) error {
+	err := ec.c.CallContext(ctx, result, "trace_transaction", txHash.Hex())
+	if err == nil {
+		if result == nil {
+			return ethereum.NotFound
+		}
+	}
+	return err
+}
+
+// TransactionInBlock returns a single transaction at index in the given block.
+func (ec *Client) BlockTraces(ctx context.Context, number int64, result interface{}) error {
+	hex := "0x" + strconv.FormatInt(number, 16)
+	err := ec.c.CallContext(ctx, result, "trace_block", hex)
+	if err == nil {
+		if result == nil {
+			return ethereum.NotFound
+		}
+	}
+	return err
+}
+
+// TransactionInBlock returns a single transaction at index in the given block.
+func (ec *Client) BatchReceipts(ctx context.Context, txHashes []common.Hash) ([]*types.Receipt, error) {
+	receipts := make([]*types.Receipt, len(txHashes))
+	reqs := make([]rpc.BatchElem, len(txHashes))
+	for i := range reqs {
+		reqs[i] = rpc.BatchElem{
+			Method: "eth_getTransactionReceipt",
+			Args:   []interface{}{txHashes[i]},
+			Result: &receipts[i],
+		}
+	}
+
+	if err := ec.c.BatchCallContext(ctx, reqs); err != nil {
+		return nil, err
+	}
+	for i := range reqs {
+		if reqs[i].Error != nil {
+			return nil, reqs[i].Error
+		}
+		if receipts[i] == nil {
+			return nil, fmt.Errorf("got null receipt for transaction %s", txHashes[i].String())
+		}
+	}
+
+	return receipts, nil
+
 }

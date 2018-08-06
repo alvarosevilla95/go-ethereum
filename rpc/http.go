@@ -74,7 +74,18 @@ func DialHTTP(endpoint string) (*Client, error) {
 
 	initctx := context.Background()
 	return newClient(initctx, func(context.Context) (net.Conn, error) {
-		return &httpConn{client: new(http.Client), req: req, closed: make(chan struct{})}, nil
+		var client = &http.Client{
+			Transport: &http.Transport{
+				Dial: func(network, addr string) (net.Conn, error) {
+					//fmt.Println("dial!")
+					return net.Dial(network, addr)
+				},
+				MaxIdleConns:        100,
+				MaxIdleConnsPerHost: 100,
+			},
+		}
+		//return &httpConn{client: new(http.Client), req: req, closed: make(chan struct{})}, nil
+		return &httpConn{client: client, req: req, closed: make(chan struct{})}, nil
 	})
 }
 
