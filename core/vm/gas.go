@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/alvarosevilla95/go-ethereum/params"
 )
 
 const (

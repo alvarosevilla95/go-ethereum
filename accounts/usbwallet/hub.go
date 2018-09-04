@@ -22,9 +22,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/alvarosevilla95/go-ethereum/accounts"
+	"github.com/alvarosevilla95/go-ethereum/event"
+	"github.com/alvarosevilla95/go-ethereum/log"
 	"github.com/karalabe/hid"
 )
 

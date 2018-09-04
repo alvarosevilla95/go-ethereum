@@ -21,9 +21,9 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto/sha3"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/alvarosevilla95/go-ethereum/common"
+	"github.com/alvarosevilla95/go-ethereum/crypto/sha3"
+	"github.com/alvarosevilla95/go-ethereum/log"
 	"github.com/rcrowley/go-metrics"
 )
 

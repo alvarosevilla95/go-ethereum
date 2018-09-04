@@ -19,8 +19,8 @@ package miner
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/alvarosevilla95/go-ethereum/common"
+	"github.com/alvarosevilla95/go-ethereum/core/types"
 )
 
 // noopHeaderRetriever is an implementation of headerRetriever that always

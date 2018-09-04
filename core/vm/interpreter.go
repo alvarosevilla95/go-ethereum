@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/alvarosevilla95/go-ethereum/common"
+	"github.com/alvarosevilla95/go-ethereum/common/math"
+	"github.com/alvarosevilla95/go-ethereum/crypto"
+	"github.com/alvarosevilla95/go-ethereum/params"
 )
 
 // Config are the configuration options for the Interpreter

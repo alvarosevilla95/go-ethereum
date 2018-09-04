@@ -25,15 +25,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/internal/ethapi"
-	"github.com/ethereum/go-ethereum/les"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/alvarosevilla95/go-ethereum/accounts/abi/bind"
+	"github.com/alvarosevilla95/go-ethereum/common"
+	"github.com/alvarosevilla95/go-ethereum/eth"
+	"github.com/alvarosevilla95/go-ethereum/internal/ethapi"
+	"github.com/alvarosevilla95/go-ethereum/les"
+	"github.com/alvarosevilla95/go-ethereum/log"
+	"github.com/alvarosevilla95/go-ethereum/node"
+	"github.com/alvarosevilla95/go-ethereum/p2p"
+	"github.com/alvarosevilla95/go-ethereum/rpc"
 )
 
 // Interval to check for new releases
@@ -149,7 +149,7 @@ func (r *ReleaseService) checkVersion() {
 
 		warning := fmt.Sprintf("Client v%d.%d.%d-%x seems older than the latest upstream release v%d.%d.%d-%x",
 			r.config.Major, r.config.Minor, r.config.Patch, r.config.Commit[:4], version.Major, version.Minor, version.Patch, version.Commit[:4])
-		howtofix := fmt.Sprintf("Please check https://github.com/ethereum/go-ethereum/releases for new releases")
+		howtofix := fmt.Sprintf("Please check https://github.com/alvarosevilla95/go-ethereum/releases for new releases")
 		separator := strings.Repeat("-", len(warning))
 
 		log.Warn(separator)

@@ -26,7 +26,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/alvarosevilla95/go-ethereum/rlp"
 )
 
 var (

@@ -23,9 +23,9 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/alvarosevilla95/go-ethereum/common"
+	"github.com/alvarosevilla95/go-ethereum/common/hexutil"
+	"github.com/alvarosevilla95/go-ethereum/core/vm"
 	"github.com/robertkrimen/otto"
 )
 
