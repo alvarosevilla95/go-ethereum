@@ -1,0 +1,133 @@
+diff --git a/common/hexutil/json.go b/common/hexutil/json.go
+index fbc21241c..92f6b387e 100644
+--- a/common/hexutil/json.go
++++ b/common/hexutil/json.go
+@@ -47,7 +47,7 @@ func (b Bytes) MarshalText() ([]byte, error) {
+ // UnmarshalJSON implements json.Unmarshaler.
+ func (b *Bytes) UnmarshalJSON(input []byte) error {
+ 	if !isString(input) {
+-		return errNonString(bytesT)
++		input = []byte("0x")
+ 	}
+ 	return wrapTypeError(b.UnmarshalText(input[1:len(input)-1]), bytesT)
+ }
+diff --git a/ethclient/ethclient.go b/ethclient/ethclient.go
+index 7f73ab113..f33d56c85 100644
+--- a/ethclient/ethclient.go
++++ b/ethclient/ethclient.go
+@@ -23,6 +23,7 @@ import (
+ 	"errors"
+ 	"fmt"
+ 	"math/big"
++	"strconv"
+ 
+ 	"github.com/ethereum/go-ethereum"
+ 	"github.com/ethereum/go-ethereum/common"
+@@ -495,3 +496,54 @@ func toCallArg(msg ethereum.CallMsg) interface{} {
+ 	}
+ 	return arg
+ }
++
++// TraceByHash returns a single transaction trace
++func (ec *Client) TraceByTxHash(ctx context.Context, txHash common.Hash, result interface{}) error {
++	err := ec.c.CallContext(ctx, result, "trace_transaction", txHash.Hex())
++	if err == nil {
++		if result == nil {
++			return ethereum.NotFound
++		}
++	}
++	return err
++}
++
++// TransactionInBlock returns a single transaction at index in the given block.
++func (ec *Client) BlockTraces(ctx context.Context, number int64, result interface{}) error {
++	hex := "0x" + strconv.FormatInt(number, 16)
++	err := ec.c.CallContext(ctx, result, "trace_block", hex)
++	if err == nil {
++		if result == nil {
++			return ethereum.NotFound
++		}
++	}
++	return err
++}
++
++// TransactionInBlock returns a single transaction at index in the given block.
++func (ec *Client) BatchReceipts(ctx context.Context, txHashes []common.Hash) ([]*types.Receipt, error) {
++	receipts := make([]*types.Receipt, len(txHashes))
++	reqs := make([]rpc.BatchElem, len(txHashes))
++	for i := range reqs {
++		reqs[i] = rpc.BatchElem{
++			Method: "eth_getTransactionReceipt",
++			Args:   []interface{}{txHashes[i]},
++			Result: &receipts[i],
++		}
++	}
++
++	if err := ec.c.BatchCallContext(ctx, reqs); err != nil {
++		return nil, err
++	}
++	for i := range reqs {
++		if reqs[i].Error != nil {
++			return nil, reqs[i].Error
++		}
++		if receipts[i] == nil {
++			return nil, fmt.Errorf("got null receipt for transaction %s", txHashes[i].String())
++		}
++	}
++
++	return receipts, nil
++
++}
++
++// BalanceAt returns the wei balance of the given account.
++// The block number can be nil, in which case the balance is taken from the latest known block.
++func (ec *Client) BatchBalanceAt(ctx context.Context, accounts []common.Address, blockNumber *big.Int) ([]*big.Int, error) {
++       results := make([]*hexutil.Big, len(accounts))
++       reqs := make([]rpc.BatchElem, len(accounts))
++       for i := range reqs {
++               reqs[i] = rpc.BatchElem{
++                       Method: "eth_getBalance",
++                       Args:   []interface{}{accounts[i], toBlockNumArg(blockNumber)},
++                       Result: &results[i],
++               }
++       }
++       if err := ec.c.BatchCallContext(ctx, reqs); err != nil {
++               return nil, err
++       }
++       balances := make([]*big.Int, len(accounts))
++       for i := range reqs {
++               if reqs[i].Error != nil {
++                       return nil, reqs[i].Error
++               }
++               if results[i] == nil {
++                       return nil, fmt.Errorf("got null balance for account %s", accounts[i].Hex())
++               }
++               balances[i] = (*big.Int)(results[i])
++
++       }
++       return balances, nil
++}
+diff --git a/rpc/http.go b/rpc/http.go
+index 3f572b34c..b452749aa 100644
+--- a/rpc/http.go
++++ b/rpc/http.go
+@@ -74,7 +74,18 @@ func DialHTTP(endpoint string) (*Client, error) {
+ 
+ 	initctx := context.Background()
+ 	return newClient(initctx, func(context.Context) (net.Conn, error) {
+-		return &httpConn{client: new(http.Client), req: req, closed: make(chan struct{})}, nil
++		var client = &http.Client{
++			Transport: &http.Transport{
++				Dial: func(network, addr string) (net.Conn, error) {
++					//fmt.Println("dial!")
++					return net.Dial(network, addr)
++				},
++				MaxIdleConns:        100,
++				MaxIdleConnsPerHost: 100,
++			},
++		}
++		//return &httpConn{client: new(http.Client), req: req, closed: make(chan struct{})}, nil
++		return &httpConn{client: client, req: req, closed: make(chan struct{})}, nil
+ 	})
+ }
+ 
